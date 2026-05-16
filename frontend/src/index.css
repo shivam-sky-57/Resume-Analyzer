@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-page text-neutral-slate font-sans transition-colors duration-300;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border-[0.5px] border-black/10 rounded-card;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:brightness-110 transition-all shadow-sm flex items-center justify-center gap-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-white border border-black/10 text-neutral-slate px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-page transition-all flex items-center justify-center gap-2;
+  }
+  
+  .btn-ghost {
+    @apply text-primary font-semibold hover:bg-primary/5 px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2.5 bg-white border border-black/10 rounded-input focus:outline-none focus:border-primary/50 transition-all;
+  }
+  
+  .label-text {
+    @apply text-[12px] font-medium uppercase tracking-wider text-neutral-slate/60 mb-1.5;
+  }
+  
+  .badge {
+    @apply px-3 py-1 rounded-full text-[12px] font-bold uppercase tracking-wider;
+  }
+}
+
+/* Animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
+}
+
+/* Dark Mode Simulation */
+.dark-mode {
+  filter: invert(0.9) hue-rotate(180deg);
+  background: #000;
+}
+
+.dark-mode img, 
+.dark-mode video, 
+.dark-mode .no-invert,
+.dark-mode aside,
+.dark-mode .card,
+.dark-mode .btn-primary {
+  filter: invert(1) hue-rotate(180deg);
+}
