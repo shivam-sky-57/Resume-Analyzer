@@ -35,7 +35,7 @@ const LandingPage = () => {
             Get your resume scored by AI in seconds.
           </h1>
           <p className="text-lg text-neutral-slate/60 leading-relaxed max-w-lg">
-            Upload your PDF resume and receive an instant score, detailed feedback, and job-matched suggestions powered by Gemini AI.
+            Upload your PDF resume and receive an instant score, detailed feedback, and job-matched suggestions powered by Groq AI.
           </p>
           <div className="flex flex-wrap items-center gap-4 mt-4">
             <Link to="/register" className="btn-primary !px-8 !py-4 !text-base shadow-xl shadow-primary/20">

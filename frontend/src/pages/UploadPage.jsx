@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   IconUpload, IconFileText, IconX, IconCheck, IconLoader2, IconCircle 
@@ -17,60 +17,86 @@ const UploadPage = () => {
     { id: 4, label: 'Generating feedback', status: 'waiting' },
     { id: 5, label: 'Fetching job matches', status: 'waiting' },
   ]);
+  const isUploadingRef = useRef(false);
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
-    const selected = e.target.files[0];
+    const selected = e.target.files?.[0];
     if (selected && selected.type === 'application/pdf') {
-      setFile(selected);
-      handleUpload(selected);
+      startUploadFlow(selected);
     }
   };
 
-  const handleUpload = async (selectedFile) => {
-    if (!selectedFile || uploading || processing) return;
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const selected = e.dataTransfer.files?.[0];
+    if (selected && selected.type === 'application/pdf') {
+      startUploadFlow(selected);
+    }
+  };
+
+  const startUploadFlow = async (selectedFile) => {
+    if (!selectedFile || isUploadingRef.current) return;
+    isUploadingRef.current = true;
+    setFile(selectedFile);
     setUploading(true);
     setProgress(0);
-    
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          startProcessing(selectedFile);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-  };
 
-  const startProcessing = async (selectedFile) => {
-    if (processing) return;
-    setUploading(false);
-    setProcessing(true);
-    
-    // Step-by-step simulation for UI journey
-    for (let i = 0; i < steps.length; i++) {
-      updateStepStatus(i + 1, 'progress');
-      await new Promise(r => setTimeout(r, 1500));
-      updateStepStatus(i + 1, 'done');
-    }
+    // Smooth upload animation
+    let currentProgress = 0;
+    const progressInterval = setInterval(() => {
+      currentProgress += 20;
+      if (currentProgress <= 90) {
+        setProgress(currentProgress);
+      }
+    }, 150);
 
     try {
+      // Switch to processing stage
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        setProgress(100);
+        setUploading(false);
+        setProcessing(true);
+        runStepAnimations();
+      }, 700);
+
+      // Trigger ONE actual upload API call
       const res = await resumeAPI.upload(selectedFile);
-      navigate(`/analysis/${res.data.id}`);
+      
+      // Complete all step animations and navigate
+      setSteps(prev => prev.map(s => ({ ...s, status: 'done' })));
+      setTimeout(() => {
+        navigate(`/analysis/${res.data.id}`);
+      }, 600);
     } catch (err) {
-      console.error(err);
-      const errorMsg = err.response?.data?.error || 'Analysis failed. Please check your API key and try again.';
+      clearInterval(progressInterval);
+      console.error('Upload failed:', err);
+      const errorMsg = err.response?.data?.error || err.message || 'Analysis failed. Please try again.';
       alert(`Analysis failed: ${errorMsg}`);
+      setUploading(false);
       setProcessing(false);
       setFile(null);
+      isUploadingRef.current = false;
     }
   };
 
-  const updateStepStatus = (id, status) => {
-    setSteps(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+  const runStepAnimations = () => {
+    let currentStep = 1;
+    setSteps(prev => prev.map(s => s.id === 1 ? { ...s, status: 'progress' } : s));
+
+    const stepInterval = setInterval(() => {
+      currentStep++;
+      if (currentStep <= 5) {
+        setSteps(prev => prev.map(s => {
+          if (s.id < currentStep) return { ...s, status: 'done' };
+          if (s.id === currentStep) return { ...s, status: 'progress' };
+          return s;
+        }));
+      } else {
+        clearInterval(stepInterval);
+      }
+    }, 800);
   };
 
   return (
@@ -84,7 +110,11 @@ const UploadPage = () => {
 
         {/* ─── STATE 1: EMPTY / DROP ZONE ─── */}
         {!file && (
-          <div className="bg-white card border-dashed border-2 border-primary/20 p-20 flex flex-col items-center gap-6 group hover:border-primary/50 transition-all cursor-pointer relative overflow-hidden">
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+            className="bg-white card border-dashed border-2 border-primary/20 p-20 flex flex-col items-center gap-6 group hover:border-primary/50 transition-all cursor-pointer relative overflow-hidden"
+          >
             <input 
               type="file" accept=".pdf" onChange={handleFileChange}
               className="absolute inset-0 opacity-0 cursor-pointer z-10" 
@@ -115,7 +145,10 @@ const UploadPage = () => {
                   <p className="text-[12px] text-neutral-slate/40 uppercase font-bold tracking-widest">Uploading...</p>
                 </div>
               </div>
-              <button onClick={() => { setFile(null); setUploading(false); }} className="p-2 hover:bg-page rounded-lg text-neutral-slate/30 transition-colors">
+              <button 
+                onClick={() => { setFile(null); setUploading(false); isUploadingRef.current = false; }} 
+                className="p-2 hover:bg-page rounded-lg text-neutral-slate/30 transition-colors"
+              >
                 <IconX size={20} />
               </button>
             </div>
@@ -181,7 +214,7 @@ const UploadPage = () => {
 
               <div className="mt-6 pt-8 border-t border-black/5 flex items-center justify-between">
                 <p className="text-[13px] text-neutral-slate/50 font-medium italic">
-                  Usually takes about 15 seconds...
+                  Analysing with AI model...
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />

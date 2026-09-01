@@ -4,7 +4,7 @@ ResumeIQ is a comprehensive full-stack application designed to analyze resumes u
 
 ## Features
 
-- **AI Resume Analysis**: Upload resumes (PDF format) and receive detailed analysis and suggestions powered by the Gemini API.
+- **AI Resume Analysis**: Upload resumes (PDF format) and receive detailed analysis and suggestions powered by the Groq API (Llama 3.3).
 - **Job Recommendations**: Get tailored job listings matching your resume using the Adzuna API integration.
 - **Secure Authentication**: Robust user authentication and session management using JWT (JSON Web Tokens) and Spring Security.
 - **Interactive Dashboard**: View analysis history, user statistics, and job matches through an intuitive and responsive UI.
@@ -24,6 +24,7 @@ ResumeIQ is a comprehensive full-stack application designed to analyze resumes u
 - **Spring Security** with stateless JWT authentication
 - **Spring Data JPA** for robust database operations
 - **Apache PDFBox** for robust PDF parsing and text extraction
+- **Groq Cloud API** for ultra-fast LLM inference
 - **PostgreSQL** for relational data persistence
 - **Docker** for database containerization
 
@@ -54,7 +55,7 @@ cd Resume-Analyzer
 Use the provided `docker-compose.yml` to spin up the PostgreSQL database:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 This will start a PostgreSQL instance on port `5432` with the necessary database and credentials.
@@ -65,14 +66,15 @@ This will start a PostgreSQL instance on port `5432` with the necessary database
    ```bash
    cd backend
    ```
-2. Create a `.env` file in the `backend` directory with the following variables:
+2. Create or edit the `.env` file in the `backend` directory with the following variables:
 
    ```env
    DB_URL=jdbc:postgresql://localhost:5432/resumeiq
    DB_USERNAME=resumeiq
    DB_PASSWORD=resumeiq123
    
-   GEMINI_API_KEY=your_gemini_api_key_here
+   GROQ_API_KEY=your_groq_api_key_here
+   GROQ_MODEL=llama-3.3-70b-versatile
    
    ADZUNA_APP_ID=your_adzuna_app_id_here
    ADZUNA_API_KEY=your_adzuna_api_key_here

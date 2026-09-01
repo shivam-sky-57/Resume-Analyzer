@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IconFileText, IconBrandGoogle, IconArrowRight, IconMail } from '@tabler/icons-react';
 import { authAPI } from '../services/api';
@@ -10,6 +10,12 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (localStorage.getItem('user')) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -17,7 +23,7 @@ const RegisterPage = () => {
     try {
       const res = await authAPI.register(formData);
       localStorage.setItem('user', JSON.stringify(res.data));
-      navigate('/upload');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
